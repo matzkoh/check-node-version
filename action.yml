@@ -1,0 +1,37 @@
+name: check-node-version
+description: GitHub Actions to check if node-version has been released and is available via brew node-build.
+author: matzkoh
+
+inputs:
+  node-version:
+    description: The version to check
+  node-version-path:
+    description: The path to the .node-version file
+    default: .node-version
+
+runs:
+  using: composite
+  steps:
+    - id: check
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.node-version }}" ]; then
+          node_version=${{ inputs.node-version }}
+        else
+          node_version=$(< ${{ inputs.node-version-path }})
+        fi
+
+        node_build_version=$(curl -s 'https://formulae.brew.sh/api/formula/node-build.json' | jq -r '.versions.stable')
+
+        echo "node-version=${node_version}" >> $GITHUB_OUTPUT
+        echo "node-build-version=${node_build_version}" >> $GITHUB_OUTPUT
+
+        curl -fsIo /dev/null "https://raw.githubusercontent.com/nodenv/node-build/v${node_build_version}/share/node-build/${node_version}"
+
+outputs:
+  node-version:
+    description: The version in .node-version
+    value: ${{ steps.check.outputs.node-version }}
+  node-build-version:
+    description: The latest node-build version
+    value: ${{ steps.check.outputs.node-build-version }}
