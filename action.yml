@@ -2,6 +2,10 @@ name: check-node-version
 description: GitHub Actions to check if node-version has been released and is available via brew node-build.
 author: matzkoh
 
+branding:
+  icon: check-circle
+  color: green
+
 inputs:
   node-version:
     description: The version to check
